@@ -1,6 +1,25 @@
-import express from "express"
-import {application} from "./config/constants"
+import "reflect-metadata";
 
-const app = express()
+import express from "express";
+import { application } from "./common/config/constants";
+import router from "./router";
+import database from "./common/config/database";
 
-app.listen(application.port, () => console.log(`The server is running on port ${application.port}`))
+async function main() {
+  try {
+    await database.initialize();
+
+    const app = express();
+
+    app.use(express.json());
+    app.use(router);
+
+    app.listen(application.port, () =>
+      console.log(`The server is running on port ${application.port}`)
+    );
+  } catch (e) {
+    console.error((e as Error).message);
+  }
+}
+
+main();
