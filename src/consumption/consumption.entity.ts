@@ -20,4 +20,7 @@ export default class ConsumptionEntity extends BaseEntity {
 
   @Column({ type: "varchar" })
   public attachment: string;
+
+  @Column({ type: "timestamp", nullable: true })
+  public confirmed_at?: Date;
 }

@@ -28,6 +28,31 @@ export default class ConsumptionService {
     });
   }
 
+  public async confirm(
+    measure_uuid: string,
+    confirmed_value: number
+  ): Promise<void> {
+    const measure = await this.consumptionRepository.findOneOrFail({
+      where: {
+        id: measure_uuid,
+      },
+    });
+
+    if (measure.confirmed_at) {
+      throw new Error("Record was already confirmed.");
+    }
+
+    await this.consumptionRepository.update(
+      {
+        id: measure_uuid,
+      },
+      {
+        measure_value: confirmed_value,
+        confirmed_at: new Date(),
+      }
+    );
+  }
+
   public async findConsumptionByMonth(
     measure_datetime: Date
   ): Promise<ConsumptionEntity | null> {
