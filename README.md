@@ -18,7 +18,7 @@ Once the image is built, start the container:
 docker compose up -d
 ```
 
-That's all you need 🎉!
+That's all you need 🎉! You can also access the demo at `http://3.85.33.55`
 
 ## TESTS
 
