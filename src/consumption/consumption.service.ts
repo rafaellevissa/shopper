@@ -28,6 +28,21 @@ export default class ConsumptionService {
     });
   }
 
+  public async listByCustomer(
+    customerCode: string,
+    measureType?: MeasureType
+  ): Promise<ConsumptionEntity[]> {
+    const consumptions = await this.consumptionRepository.findBy({
+      customer_code: customerCode,
+      measure_type: measureType,
+    });
+
+    if (!consumptions.length) {
+      throw new Error("No record found for the provided customer id");
+    }
+
+    return consumptions;
+  }
   public async confirm(
     measure_uuid: string,
     confirmed_value: number

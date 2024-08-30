@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsUUID,
 } from "class-validator";
 import { MeasureType } from "../common/data-types";
@@ -33,7 +34,6 @@ export class ConsumptionUploadDto {
   }
 }
 
-
 export class ConsumptionConfirmDto {
   @IsUUID()
   @IsNotEmpty()
@@ -46,5 +46,15 @@ export class ConsumptionConfirmDto {
   constructor(payload: any) {
     this.measure_uuid = payload?.measure_uuid;
     this.confirmed_value = payload?.confirmed_value;
+  }
+}
+
+export class ConsumptionListDto {
+  @IsEnum(MeasureType)
+  @IsOptional()
+  public measure_type: MeasureType;
+
+  constructor(payload: any) {
+    this.measure_type = payload?.measure_type;
   }
 }
