@@ -133,14 +133,13 @@ export default class ConsumptionService {
     const uploadResponse = await this.geminiModel.generateContent([
       {
         inlineData: {
-          mimeType: "image/*",
+          mimeType: "image/jpeg",
           data: base64Image,
         },
       },
       {
         text: "Leia o consumo de água e gás nesta imagem do medidor e retorne apenas o valor numérico.",
       },
-      ``,
     ]);
 
     const measureValue = parseInt(uploadResponse.response.text());

@@ -11,6 +11,7 @@ async function main() {
 
     const app = express();
 
+    app.use(express.json({ limit: "1mb" }));
     app.use(express.json());
     app.use(router);
 
