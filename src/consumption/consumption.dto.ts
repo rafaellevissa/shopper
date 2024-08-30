@@ -55,6 +55,6 @@ export class ConsumptionListDto {
   public measure_type: MeasureType;
 
   constructor(payload: any) {
-    this.measure_type = payload?.measure_type;
+    this.measure_type = payload?.measure_type?.toUpperCase();
   }
 }

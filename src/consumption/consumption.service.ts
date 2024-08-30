@@ -3,8 +3,15 @@ import { application, aws } from "../common/config/constants";
 import { Between, Repository } from "typeorm";
 import ConsumptionEntity from "./consumption.entity";
 import database from "../common/config/database";
-import { ConsumptionUploaded, MeasureType } from "../common/data-types";
+import {
+  ConsumptionList,
+  ConsumptionUploaded,
+  HTTPErrorCode,
+  HTTPStatusCode,
+  MeasureType,
+} from "../common/data-types";
 import { S3Storage } from "../common/utils/storage";
+import { HttpException } from "../common/exception";
 
 export default class ConsumptionService {
   private geminiModel: GenerativeModel;
@@ -31,30 +38,49 @@ export default class ConsumptionService {
   public async listByCustomer(
     customerCode: string,
     measureType?: MeasureType
-  ): Promise<ConsumptionEntity[]> {
+  ): Promise<ConsumptionList> {
     const consumptions = await this.consumptionRepository.findBy({
       customer_code: customerCode,
       measure_type: measureType,
     });
 
     if (!consumptions.length) {
-      throw new Error("No record found for the provided customer id");
+      throw new HttpException(
+        HTTPStatusCode.NOT_FOUND,
+        HTTPErrorCode.MEASURES_NOT_FOUND,
+        "Nenhuma leitura encontrada"
+      );
     }
 
-    return consumptions;
+    return {
+      customer_code: customerCode,
+      measures: consumptions,
+    };
   }
   public async confirm(
     measure_uuid: string,
     confirmed_value: number
   ): Promise<void> {
-    const measure = await this.consumptionRepository.findOneOrFail({
+    const measure = await this.consumptionRepository.findOne({
       where: {
         id: measure_uuid,
       },
     });
 
+    if (!measure) {
+      throw new HttpException(
+        HTTPStatusCode.NOT_FOUND,
+        HTTPErrorCode.MEASURE_NOT_FOUND,
+        "Leitura do mês já realizada"
+      );
+    }
+
     if (measure.confirmed_at) {
-      throw new Error("Record was already confirmed.");
+      throw new HttpException(
+        HTTPStatusCode.CONFLICT,
+        HTTPErrorCode.CONFIRMATION_DUPLICATE,
+        "Leitura do mês já realizada"
+      );
     }
 
     await this.consumptionRepository.update(
@@ -102,7 +128,11 @@ export default class ConsumptionService {
     const consumption = await this.findConsumptionByMonth(measureDatetime);
 
     if (consumption) {
-      throw new Error("There is already a record for this month");
+      throw new HttpException(
+        HTTPStatusCode.CONFLICT,
+        HTTPErrorCode.DOUBLE_REPORT,
+        "Já  existe  uma  leitura  para  este  tipo no mês atual"
+      );
     }
 
     const measureValue = await this.detectConsumption(base64Image);
